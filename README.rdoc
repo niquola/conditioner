@@ -4,7 +4,7 @@
 
 == DESCRIPTION:
 
- Simple conditions builder for active_resource
+ Simple conditions builder for active_record
 
 == SYNOPSIS:
 
