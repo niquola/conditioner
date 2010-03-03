@@ -1,26 +1,58 @@
 = conditioner
 
-* http://github.com/#{github_username}/#{project_name}
+* http://github.com/niquola/conditioner
 
 == DESCRIPTION:
 
-FIX (describe your package)
-
-== FEATURES/PROBLEMS:
-
-* FIX (list of features or problems)
+ Simple conditions builder for active_resource
 
 == SYNOPSIS:
 
-  FIX (code sample of usage)
+  def test_conditioner_creation
+    cnd = User.conditioner
+    assert_not_nil(cnd)
+    params={:name=>'nicola',:email=>'nicola@mail.com'}
+    cnd = User.conditioner(params)
+    assert_not_nil(cnd)
+  end
 
-== REQUIREMENTS:
+  def test_extraction
+    cnd=User.conditioner(:updated_at=>'2009-01-01', :email=>'nicola@mail.com',:unexisting=>'value')
+    assert_match(/"users"."email"\s*=\s*E'nicola@mail.com'/, cnd)
+    assert_match(/users.updated_at BETWEEN E'2009-01-01 00:00' AND E'2009-01-01 23:59:59.999'/, cnd)
+    assert_no_match(/unexisting/, cnd)
+  end
 
-* FIX (list of requirements)
+  def test_extract_from_and_to_prefixed_date_fields
+    cnd = User.conditioner :to_updated_at =>'2010-02-02', :from_updated_at=>'2009-01-01'
+    assert_match(/updated_at <= E'2010-02-02 23:59:59.999'/, cnd)
+    assert_match(/updated_at >= E'2009-01-01 00:00:00.000'/, cnd)
+  end
+
+  def test_ilike
+    cnd = User.conditioner :name=>'*nicola*'
+    assert_match(/name ILIKE E'%nicola%'/, cnd)
+  end
+
+== TODO:
+
+ * Add pluguble rules for extactions
+
+ Example: 
+
+ Conditioner.configure do
+   extraction_rule do |key,value|
+     if /.*_gt/ =~ key
+       ["#{table_name}.#{key.gsub(/_gt$/,'')} > ?",value]
+     end
+   end
+ end
 
 == INSTALL:
 
-* FIX (sudo gem install, anything else)
+ in config/environmen.rb 
+ gem 'conditioner'
+ sudo rake gems:install
 
 == LICENSE:
 

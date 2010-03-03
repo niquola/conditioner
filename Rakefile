@@ -21,6 +21,15 @@ end
 require 'newgem/tasks'
 Dir['tasks/**/*.rake'].each { |t| load t }
 
-# TODO - want other tests/tasks run by default? Add them to the list
-# remove_task :default
-# task :default => [:spec, :features]
+
+desc 'push gem to medapp'
+namespace :medapp do
+  task :push do
+    gem_name =  File.basename(Dir['pkg/*.gem'].max)
+    last_gem = File.join(File.dirname(__FILE__),'pkg',gem_name);
+    server = 'demo'
+    gem_copy_path = "/tmp/#{gem_name}"
+    system "scp #{last_gem} #{server}:#{gem_copy_path}"
+    system "ssh -t #{server} sudo gem install #{gem_copy_path}"  
+  end
+end
