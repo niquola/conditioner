@@ -1,35 +1,46 @@
-require 'rubygems'
-gem 'hoe', '>= 2.1.0'
-require 'hoe'
-require 'fileutils'
-require './lib/conditioner'
+require 'rake'
+require 'rake/testtask'
+require 'rake/rdoctask'
+require 'rake/gempackagetask'
 
-Hoe.plugin :newgem
-# Hoe.plugin :website
-# Hoe.plugin :cucumberfeatures
+desc 'Default: run unit tests.'
+task :default => :test
 
-# Generate all the Rake tasks
-# Run 'rake -T' to see list of generated tasks (from gem root directory)
-$hoe = Hoe.spec 'conditioner' do
-  self.developer 'niquola', 'niquola@gmail.com'
-  self.post_install_message = 'PostInstall.txt' # TODO remove if post-install message not required
-  self.rubyforge_name       = self.name # TODO this is default value
-  self.extra_deps         = [['activerecord','>= 2.3.5']]
-
+desc 'Test the pg_gnostic plugin.'
+Rake::TestTask.new(:test) do |t|
+  t.libs << 'lib'
+  t.libs << 'test'
+  t.pattern = 'test/**/*_test.rb'
+  t.verbose = true
 end
 
-require 'newgem/tasks'
-Dir['tasks/**/*.rake'].each { |t| load t }
+desc 'Generate documentation for the pg_gnostic plugin.'
+Rake::RDocTask.new(:rdoc) do |rdoc|
+  rdoc.rdoc_dir = 'rdoc'
+  rdoc.title    = 'Conditioner'
+  rdoc.options << '--line-numbers' << '--inline-source'
+  rdoc.rdoc_files.include('README.rdoc')
+  rdoc.rdoc_files.include('lib/**/*.rb')
+end
 
 
-desc 'push gem to medapp'
-namespace :medapp do
-  task :push do
-    gem_name =  File.basename(Dir['pkg/*.gem'].max)
-    last_gem = File.join(File.dirname(__FILE__),'pkg',gem_name);
-    server = 'demo'
-    gem_copy_path = "/tmp/#{gem_name}"
-    system "scp #{last_gem} #{server}:#{gem_copy_path}"
-    system "ssh -t #{server} sudo gem install #{gem_copy_path}"  
-  end
+PKG_FILES = FileList[ '[a-zA-Z]*', 'generators/**/*', 'lib/**/*', 'rails/**/*', 'tasks/**/*', 'test/**/*' ]
+
+spec = Gem::Specification.new do |s|
+  s.name = "conditioner"
+  s.version = "0.0.2"
+  s.author = "niquola"
+  s.email = "niquola@gmail.com"
+  s.homepage = "http://github.com/niquola/conditioner"
+  s.platform = Gem::Platform::RUBY
+  s.summary = "Simple conditions builder for active_record"
+  s.files = PKG_FILES.to_a 
+  s.require_path = "lib"
+  s.has_rdoc = false
+  s.extra_rdoc_files = ["README.rdoc"]
+end
+
+desc 'Turn this plugin into a gem.'
+Rake::GemPackageTask.new(spec) do |pkg|
+  pkg.gem_spec = spec
 end

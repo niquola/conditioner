@@ -1,7 +1,7 @@
 require 'stringio'
 require File.dirname(__FILE__) + '/../lib/conditioner'
-require 'rubygems'
 require "test/unit"
+require 'rubygems'
 require 'active_record'
 
 ActiveRecord::Base.logger = nil
