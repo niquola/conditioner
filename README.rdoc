@@ -4,58 +4,44 @@
 
 == DESCRIPTION:
 
- Simple conditions builder for active_record
+Simple conditions builder for active_record
 
-== SYNOPSIS:
+== INSTALL:
 
-  def test_conditioner_creation
-    cnd = User.conditioner
-    assert_not_nil(cnd)
-    params={:name=>'nicola',:email=>'nicola@mail.com'}
-    cnd = User.conditioner(params)
-    assert_not_nil(cnd)
-  end
+in config/environment.rb:
 
-  def test_extraction
-    cnd=User.conditioner(:updated_at=>'2009-01-01', :email=>'nicola@mail.com',:unexisting=>'value')
-    assert_match(/"users"."email"\s*=\s*E'nicola@mail.com'/, cnd)
-    assert_match(/users.updated_at BETWEEN E'2009-01-01 00:00' AND E'2009-01-01 23:59:59.999'/, cnd)
-    assert_no_match(/unexisting/, cnd)
-  end
+ config.gem 'conditioner'
 
-  def test_extract_from_and_to_prefixed_date_fields
-    cnd = User.conditioner :to_updated_at =>'2010-02-02', :from_updated_at=>'2009-01-01'
-    assert_match(/updated_at <= E'2010-02-02 23:59:59.999'/, cnd)
-    assert_match(/updated_at >= E'2009-01-01 00:00:00.000'/, cnd)
-  end
+and then 
 
-  def test_ilike
-    cnd = User.conditioner :name=>'*nicola*'
-    assert_match(/name ILIKE E'%nicola%'/, cnd)
-  end
+ sudo rake gems:install
 
-== TODO:
+To override Conditioner configurations create config/initializers/conditioner.rb with:
 
- * Add pluguble rules for extactions
 
- Example: 
+  Conditioner.configure do
 
- Conditioner.configure do
    extraction_rule do |key,value|
      if /.*_gt/ =~ key
        ["#{table_name}.#{key.gsub(/_gt$/,'')} > ?",value]
      end
    end
- end
+  end
 
-== INSTALL:
+== USAGE
 
- in config/environment.rb 
- config.gem 'conditioner'
+  #this create conditions from params using extract rules  
+  cnd = YourModel.conditioner(params)
+  #<b>and</b> and <b>or</b> eat same parameters as :conditions option in ActiveRecord.find
+  cnd.and  :field=>'value'
+  cnd.and  ['field='?',value]
 
- then
+  #here we pass condition into find methods
+  YourModel.all(:conditions=>cnd)
 
- sudo rake gems:install
+== CHANGE LIST:
+
+* 0.0.2 Add configurable rules for extactions
 
 == LICENSE:
 
