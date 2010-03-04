@@ -25,6 +25,7 @@ module Conditioner
     end
 
     def add_condition(unit,*args)
+      @condition_called_flag= true
       result= []
       unless @first_condition
         result<<' '<<unit
@@ -37,37 +38,22 @@ module Conditioner
     end
 
     def is_field?(field)
-      @column_names.include?(field.to_s) || (field.to_s =~ /^(from|to)_(\w*_(datetime|at))/ && @column_names.include?($2))
+      @column_names.include?(field)
     end
 
-    def c(field_name)
+    def with_table_name(field_name)
       %Q[#{@model.table_name}.#{field_name}]
     end
 
-    #FIXME: document conventions
-    #add more conventions like
-    #name_start_from
-    #field_end_with
-    #field_in_range
-    #field_gt
-    #field_mt
     def extract(hash)
       hash.each do |k,v|
-        next unless is_field?(k)
-        if v =~ /(\*$|^\*)/
-          _and(["#{c(k)} ILIKE ?",v.gsub(/(\*$|^\*)/,'%')])
-        elsif v =~ /(%$|^%)/
-          _and(["upper(#{c(k)}) like upper(?)",v])
-          #FIXME: add logic for ranges
-        elsif k.to_s =~ /^from_(\w*_(datetime|at))/
-          _and(["#{c($1)} >= ?","#{v} 00:00:00.000"])
-        elsif k.to_s =~ /^to_(\w*_(datetime|at))/
-          _and(["#{c($1)} <= ?","#{v} 23:59:59.999"])
-        elsif k.to_s.include?('_datetime') || k.to_s.include?('_at')
-          _and(["(#{c(k)} BETWEEN ? AND ?)","#{v} 00:00","#{v} 23:59:59.999"])
-        else
-          _and(k=>v)
+        field = k.to_s
+        Conditioner.config.extract_rules.each do |rule|
+          rule.call(field,v,self)
+          break if @condition_called_flag
         end
+        _and(field=>v) if is_field?(field) and !@condition_called_flag
+        @condition_called_flag = false
       end
       self
     end

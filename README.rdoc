@@ -50,8 +50,11 @@
 
 == INSTALL:
 
- in config/environmen.rb 
- gem 'conditioner'
+ in config/environment.rb 
+ config.gem 'conditioner'
+
+ then
+
  sudo rake gems:install
 
 == LICENSE:

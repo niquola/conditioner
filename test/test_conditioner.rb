@@ -1,5 +1,17 @@
 require File.dirname(__FILE__) + '/test_helper.rb'
 
+Conditioner.configure do |cfg|
+  #Must be activated by default
+  #cfg.activate_default_rules!
+  #You can clear default rules with
+  #cfg.clear_rules!
+
+  cfg.add_rule do |key, value, cnd|
+    if /(.\w*)_gt/ =~ key.to_s && cnd.is_field?($1) 
+      cnd.and(["#{key.gsub(/_gt$/,'')} > ?",value])
+    end
+  end
+end
 
 class TestConditioner < Test::Unit::TestCase
 
@@ -9,12 +21,6 @@ class TestConditioner < Test::Unit::TestCase
     params={:name=>'nicola',:email=>'nicola@mail.com'}
     cnd = User.conditioner(params)
     assert_not_nil(cnd)
-  end
-
-  def test_without_model_conditioner
-    #table_name = 'roles'
-    #fields = %w{name created_at}
-    #Conditioner.condition(table_name,fields)
   end
 
   def test_extraction
@@ -33,5 +39,11 @@ class TestConditioner < Test::Unit::TestCase
   def test_ilike
     cnd = User.conditioner :name=>'*nicola*'
     assert_match(/name ILIKE E'%nicola%'/, cnd)
+    assert_no_match(/\*nicola\*/, cnd,'Rule must work only once!')
+  end
+
+  def test_configurator
+    cnd = User.conditioner :created_at_gt => '2010-01-01'
+    assert_match(/created_at > E'2010-01-01'/, cnd)
   end
 end
