@@ -47,13 +47,13 @@ module Conditioner
 
     def extract(hash)
       hash.each do |k,v|
+        @condition_called_flag = false
         field = k.to_s
         Conditioner.config.extract_rules.each do |rule|
           rule.call(field,v,self)
           break if @condition_called_flag
         end
         _and(field=>v) if is_field?(field) and !@condition_called_flag
-        @condition_called_flag = false
       end
       self
     end

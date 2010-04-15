@@ -28,7 +28,7 @@ PKG_FILES = FileList[ '[a-zA-Z]*', 'generators/**/*', 'lib/**/*', 'rails/**/*', 
 
 spec = Gem::Specification.new do |s|
   s.name = "conditioner"
-  s.version = "0.0.2"
+  s.version = "0.0.3"
   s.author = "niquola"
   s.email = "niquola@gmail.com"
   s.homepage = "http://github.com/niquola/conditioner"
