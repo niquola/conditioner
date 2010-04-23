@@ -25,8 +25,14 @@ module Conditioner
       yield config
     end
 
-    def for_table(table_name, options = {})
-      Condition.new(table_name, options)
+    def create(table_name_or_model, options = {})
+      if table_name_or_model.is_a?(String)
+        model = FakeModel.new(table_name_or_model, options)
+      else
+        model = table_name_or_model
+      end
+
+      Condition.new(model, options)
     end
   end
 end

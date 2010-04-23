@@ -27,6 +27,20 @@ module Conditioner
           cnd.and(["#{cnd.with_table_name($1)} <= ?","#{v} 23:59:59.999"])
         elsif cnd.is_field?(field) && (field.include?('_datetime') || field.include?('_at'))
           cnd.and(["(#{cnd.with_table_name(field)} BETWEEN ? AND ?)","#{v} 00:00","#{v} 23:59:59.999"])
+        elsif field=~ /^(\w*)_(ltoe|gtoe|lt|gt)$/ and cnd.is_field?($1)
+          operator = { 'lt' => '<', 'gt' => '>', 'ltoe' => '<=', 'gtoe' => '>=' }[$2]
+          cnd.and(["#{cnd.with_table_name($1)} #{operator} ?", v])
+        elsif field=~ /^(\w*)_(begins_with|ends_with|contains)$/ and cnd.is_field?($1)
+          if $2 == 'begins_with'
+            like_expr = "#{v}%"
+          elsif $2 == 'ends_with'
+            like_expr = "%#{v}"
+          else
+            like_expr = "%#{v}%"
+          end
+          cnd.and(["#{cnd.with_table_name($1)} LIKE ?", like_expr])
+        elsif field=~ /^(\w*)_in$/ and cnd.is_field?($1)
+          cnd.and(["#{cnd.with_table_name($1)} IN (?)", v])
         end
       end
     end

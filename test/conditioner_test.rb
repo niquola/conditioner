@@ -36,10 +36,34 @@ class TestConditioner < Test::Unit::TestCase
     assert_match(/updated_at >= E'2009-01-01 00:00:00.000'/, cnd)
   end
 
+  def test_extract_lt_and_gt_postfixed_fields
+    cnd = User.conditioner :id_lt => '5', :id_gt => 2
+    assert_match(/id < E'5'/, cnd)
+    assert_match(/id > 2/, cnd)
+  end
+
+  def test_extract_ltoe_and_gtoe_postfixed_fields
+    cnd = User.conditioner :id_ltoe => '5', :id_gtoe => 2
+    assert_match(/id <= E'5'/, cnd)
+    assert_match(/id >= 2/, cnd)
+  end
+
+  def test_begins_ends_contains_rules
+    cnd = User.conditioner :email_begins_with => "a", :email_ends_with => "b", :email_contains => "c"
+    assert_match(/email LIKE E'a%'/, cnd)
+    assert_match(/email LIKE E'%b'/, cnd)
+    assert_match(/email LIKE E'%c%'/, cnd)
+  end
+
+  def test_in_postfixed_field
+    cnd = User.conditioner :email_in => ['a', 'b', 'c']
+    assert_match(/email IN \(E'a',E'b',E'c'\)/, cnd)
+  end
+
   def test_ilike
-    cnd = User.conditioner :name=>'*nicola*'
+    cnd = User.conditioner :name=> '*nicola*'
     assert_match(/name ILIKE E'%nicola%'/, cnd)
-    assert_no_match(/\*nicola\*/, cnd,'Rule must work only once!')
+    assert_no_match(/\*nicola\*/, cnd, 'Rule must work only once!')
   end
 
   def test_configurator
@@ -48,12 +72,17 @@ class TestConditioner < Test::Unit::TestCase
   end
 
   def test_conditioner_without_model
-    cnd = Conditioner.for_table('users', :columns => ['id', 'email']).extract(:email => "nicola", :foo => "bar")
+    cnd = Conditioner.create('users', :columns => ['id', 'email']).extract(:email => "nicola", :foo => "bar")
     assert_equal('"users"."email" = E\'nicola\'', cnd)
   end
 
+  def test_conditioner_without_model_with_advanced_rules
+    cnd = Conditioner.create('users', :columns => ['id', 'email']).extract(:email => "*nicola*")
+    assert_match(/email ILIKE E'%nicola%'/, cnd)
+  end
+
   def test_conditioner_without_model_and_without_hardcoded_columns
-    cnd = Conditioner.for_table('users').extract(:email => "nicola", :foo => "bar")
+    cnd = Conditioner.create('users').extract(:email => "nicola", :foo => "bar")
     assert_equal('"users"."email" = E\'nicola\'', cnd)
   end
 

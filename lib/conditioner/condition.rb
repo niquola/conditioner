@@ -1,12 +1,7 @@
 module Conditioner
   class Condition < String
     def initialize(model, options = {})
-      if model.is_a?(String)
-        @model = FakeModel.new(model, options)
-      else
-        @model = model
-      end
-
+      @model = model
       @column_names = @model.column_names
       @result = []
       @first_condition = true
