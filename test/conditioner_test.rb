@@ -7,8 +7,8 @@ Conditioner.configure do |cfg|
   #cfg.clear_rules!
 
   cfg.add_rule do |key, value, cnd|
-    if /(.\w*)_gt/ =~ key.to_s && cnd.is_field?($1) 
-      cnd.and(["#{key.gsub(/_gt$/,'')} > ?",value])
+    if /(.\w*)_gt/ =~ key.to_s && cnd.is_field?($1)
+      cnd.and(["#{key.gsub(/_gt$/,'')} > ? ", value])
     end
   end
 end
@@ -46,4 +46,15 @@ class TestConditioner < Test::Unit::TestCase
     cnd = User.conditioner :created_at_gt => '2010-01-01'
     assert_match(/created_at > E'2010-01-01'/, cnd)
   end
+
+  def test_conditioner_without_model
+    cnd = Conditioner.for_table('users', :columns => ['id', 'email']).extract(:email => "nicola", :foo => "bar")
+    assert_equal('"users"."email" = E\'nicola\'', cnd)
+  end
+
+  def test_conditioner_without_model_and_without_hardcoded_columns
+    cnd = Conditioner.for_table('users').extract(:email => "nicola", :foo => "bar")
+    assert_equal('"users"."email" = E\'nicola\'', cnd)
+  end
+
 end

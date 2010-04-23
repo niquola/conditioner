@@ -1,10 +1,15 @@
 module Conditioner
   class Condition < String
-    def initialize(model)
-      @model=model
-      @result=[]
-      @column_names=@model.column_names
-      @first_condition=true
+    def initialize(model, options = {})
+      if model.is_a?(String)
+        @model = FakeModel.new(model, options)
+      else
+        @model = model
+      end
+
+      @column_names = @model.column_names
+      @result = []
+      @first_condition = true
       yield self if block_given?
     end
 
@@ -28,12 +33,12 @@ module Conditioner
       @condition_called_flag= true
       result= []
       unless @first_condition
-        result<<' '<<unit
+        result << ' ' << unit
       else
-        @first_condition=false
+        @first_condition = false
       end
-      result<<@model.send(:sanitize_sql_for_conditions, *args)
-      self<< result.join(" ")
+      result << @model.send(:sanitize_sql_for_conditions, *args)
+      self << result.join(" ")
       self
     end
 
@@ -59,3 +64,4 @@ module Conditioner
     end
   end
 end
+

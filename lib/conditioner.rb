@@ -6,6 +6,7 @@ module Conditioner
   autoload :ActiveRecordMixin, 'conditioner/active_record_mixin'
   autoload :Condition, 'conditioner/condition'
   autoload :Configurator, 'conditioner/configurator'
+  autoload :FakeModel, 'conditioner/fake_model'
 
   class << self
     def enable
@@ -22,6 +23,10 @@ module Conditioner
 
     def configure
       yield config
+    end
+
+    def for_table(table_name, options = {})
+      Condition.new(table_name, options)
     end
   end
 end
