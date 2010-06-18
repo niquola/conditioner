@@ -26,9 +26,10 @@ end
 
 PKG_FILES = FileList[ '[a-zA-Z]*', 'generators/**/*', 'lib/**/*', 'rails/**/*', 'tasks/**/*', 'test/**/*' ]
 
+require 'lib/conditioner.rb'
 spec = Gem::Specification.new do |s|
   s.name = "conditioner"
-  s.version = "0.0.3"
+  s.version = Conditioner::VERSION
   s.author = "niquola"
   s.email = "niquola@gmail.com"
   s.homepage = "http://github.com/niquola/conditioner"
