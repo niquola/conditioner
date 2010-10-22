@@ -2,7 +2,7 @@ $:.unshift(File.dirname(__FILE__)) unless
 $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
 module Conditioner
-  VERSION = '0.0.4'
+  VERSION = '0.0.5'
   autoload :ActiveRecordMixin, 'conditioner/active_record_mixin'
   autoload :Condition, 'conditioner/condition'
   autoload :Configurator, 'conditioner/configurator'

@@ -26,14 +26,18 @@ class TestConditioner < Test::Unit::TestCase
   def test_extraction
     cnd=User.conditioner(:updated_at=>'2009-01-01', :email=>'nicola@mail.com',:unexisting=>'value')
     assert_match(/"users"."email"\s*=\s*'nicola@mail.com'/, cnd)
-    assert_match(/users.updated_at BETWEEN '2009-01-01 00:00' AND '2009-01-01 23:59:59.999'/, cnd)
+    assert_match(/users.updated_at BETWEEN '2009-01-01 00:00:00/,cnd)
+    assert_match(/AND '2009-01-01 23:59:59/, cnd)
     assert_no_match(/unexisting/, cnd)
+    User.all(:conditions=>cnd)
   end
 
   def test_extract_from_and_to_prefixed_date_fields
-    cnd = User.conditioner :to_updated_at =>'2010-02-02', :from_updated_at=>'2009-01-01'
-    assert_match(/updated_at <= '2010-02-02 23:59:59.999'/, cnd)
-    assert_match(/updated_at >= '2009-01-01 00:00:00.000'/, cnd)
+    cnd = User.conditioner :to_updated_at =>'2010-02-02', 
+      :from_updated_at=>'2009-01-01'
+    assert_match(/updated_at <= '2010-02-02 23:59:59/, cnd)
+    assert_match(/updated_at >= '2009-01-01 00:00:00/, cnd)
+    User.all(:conditions=>cnd)
   end
 
   def test_extract_lt_and_gt_postfixed_fields
