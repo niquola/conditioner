@@ -26,7 +26,7 @@ end
 
 PKG_FILES = FileList[ '[a-zA-Z]*', 'generators/**/*', 'lib/**/*', 'rails/**/*', 'tasks/**/*', 'test/**/*' ]
 
-require 'lib/conditioner.rb'
+require File.dirname(__FILE__) + '/lib/conditioner.rb'
 spec = Gem::Specification.new do |s|
   s.name = "conditioner"
   s.version = Conditioner::VERSION

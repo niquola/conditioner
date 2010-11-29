@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/test_helper.rb'
+require File.dirname(File.expand_path(__FILE__)) + '/test_helper.rb'
 
 Conditioner.configure do |cfg|
   #Must be activated by default
@@ -12,6 +12,10 @@ Conditioner.configure do |cfg|
     end
   end
 end
+
+# FIXME: we are depending on Time.zone now...
+# This is required for Time.zone to work correctly
+Time.zone ||= ENV['TZ'] || 'UTC'
 
 class TestConditioner < Test::Unit::TestCase
 
@@ -75,6 +79,12 @@ class TestConditioner < Test::Unit::TestCase
   def test_configurator
     cnd = User.conditioner :created_at_gt => '2010-01-01'
     assert_match(/created_at > '2010-01-01'/, cnd)
+  end
+
+  def test_dates_from_to
+    cnd = User.conditioner :from_created_at => '2010-01-01', :to_created_at => '2010-01-01'
+    assert_match(/created_at >= '2010-01-01 00:00:00/, cnd)
+    assert_match(/created_at <= '2010-01-01 23:59:59/, cnd)
   end
 
   def test_conditioner_without_model

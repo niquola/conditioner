@@ -43,6 +43,7 @@ To override Conditioner configurations create config/initializers/conditioner.rb
 
 * 0.0.2 Add configurable rules for extactions
 * 0.0.3 Fix bug with to extract - which eat first parameter 
+* 0.0.6 Some fixes for correct timezones support in rails 3.
 
 == LICENSE:
 
